@@ -1,6 +1,7 @@
 import numpy as np
 import progressbar
 import pdb
+import time
 
 from components.network import Network
 from components.node import Node
@@ -82,35 +83,9 @@ class Factory():
         for t in bar(range(epochs)):
             network.training_epoch(t, training_data)
 
-    def run_simulation(self, network):
-        '''
-        runs the a basic simulation
-        --testing if everything works--
-        '''
-        # create training data and train network
-        self.logger.info("Generating Training Data")
-        training_data = [
-                            generate_data(len(network.layers[0]), 0.25),
-                            generate_data(len(network.layers[1]), 0.25),
-                            generate_data(len(network.layers[2]), 0.25),
-                        ]
-
-        print(training_data[1])
-
-        self.logger.info("Training Network")
-        self.train_network(training_data, network, self.params['training_epochs'])
-        
-        # initialise the simulation
-        self.logger.info("Running Simulation")
-        network.reset()
-        t = 0
-        network.direct_activate(t, network.layers[0], training_data[0])
-        sim_log = []
-        
-        # iterate the simulation and store the data
-        bar = progressbar.ProgressBar()
-        for t in bar(range(self.params['sim_length'])):
-            iteration_data = network.iterate(t)
-            sim_log.append(iteration_data.copy())
-
-        return sim_log
+    def run_simulation(self, simulation, network):
+        start = time.time()
+        results = simulation(self, network)
+        took = round(start - time.time())
+        self.logger.info(f"Simulation {simulation.__name__} took {took} seconds")
+        return results
